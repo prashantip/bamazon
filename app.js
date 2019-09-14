@@ -1,7 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
-require("console.table");
-//var Table = require("cli-table");
+//require("console.table");
+var Table = require("cli-table");
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -26,16 +26,16 @@ connection.connect(function(err) {
       console.log("Bamazon");
      console.table(res);
       
-  //   console.log("Product ID", "Product Name", "Department Name","Price", "Quantity");
-//     var table = new Table({
-//     head: ["ID", "Product Name", "Department", "Price", "Stock"],
-//     colWidths: [5, 25, 25, 8, 5]
-// });
-     for(var i=0; i<res.length; i++){
+    console.log("Product ID", "Product Name", "Department Name","Price", "Quantity");
+    var table = new Table({
+    head: ["ID", "Product Name", "Department", "Price", "Stock"],
+    colWidths: [5, 25, 25, 8, 5]
+});
+//      for(var i=0; i<res.length; i++){
    
-  //  console.log([res[i].itemId, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quanity]);
-     //console.log ("-------------------------------");
-} 
+//    console.log([res[i].itemId, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quanity]);
+//      //console.log ("-------------------------------");
+// } 
 
  //display table
  //  console.log(table.toString());
@@ -81,21 +81,39 @@ connection.connect(function(err) {
           connection.query('UPDATE products SET stock_quantity=? WHERE id=?', [selectedItem[0].stock_quantity - quantity, itemId],
                         function(err, inventory) {
                             if (err) throw err;
-                           
+                             orderAgain();
                           })
                } else {
                             console.log('Insufficient quantity.  Please adjust your order, we only have ' + selectedItem[0].stock_quantity + ' ' + selectedItem[0].product_name + 'in stock.');
-                          
+                          orderAgain();
                        }
                       });
                     });
 
           }); //query
-                  
+        
         } //start function
-        start();
-  
-   
+          
+        function orderAgain() {
+           inquirer.prompt([{
+           name: "orderAgain",
+           type: "list",
+          message: "Do you want to order again?",
+          choices: ["Yes","No"]
+           }]).then(function(answer){
+               if (answer.orderAgain === "Yes") {
+      
+                  start();
+               }  else {
+                   console.log("Thank You");
+                   connection.end();
+               }
+      
+           })
+      }  
+
+      start()
+     
       
   
 
